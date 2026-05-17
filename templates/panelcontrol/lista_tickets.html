@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Argos - Lista de tickets{% endblock %}
+
+{% block contenido %}
+<div class="pagina-cabecera">
+    <h1>Tickets</h1>
+    <div class="acciones">
+        <a href="{% url 'panelcontrol:exportar_tickets' %}?estado={{ request.GET.estado }}&prioridad={{ request.GET.prioridad }}&categoria={{ request.GET.categoria }}" 
+           class="btn btn-secundario">
+            Exportar Excel
+        </a>
+        <a href="{% url 'panelcontrol:exportar_tickets_pdf' %}?estado={{ request.GET.estado }}&prioridad={{ request.GET.prioridad }}&categoria={{ request.GET.categoria }}" 
+           class="btn btn-secundario">
+            Exportar PDF
+        </a>
+    </div>
+</div>
+
+<div class="filtros">
+    <form method="get">
+        <select name="estado">
+            <option value="">Todos los estados</option>
+            <option value="abierto" {% if request.GET.estado == 'abierto' %}selected{% endif %}>Abierto</option>
+            <option value="en_progreso" {% if request.GET.estado == 'en_progreso' %}selected{% endif %}>En progreso</option>
+            <option value="pendiente" {% if request.GET.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+            <option value="resuelto" {% if request.GET.estado == 'resuelto' %}selected{% endif %}>Resuelto</option>
+            <option value="cerrado" {% if request.GET.estado == 'cerrado' %}selected{% endif %}>Cerrado</option>
+        </select>
+        <select name="prioridad">
+            <option value="">Todas las prioridades</option>
+            <option value="baja" {% if request.GET.prioridad == 'baja' %}selected{% endif %}>Baja</option>
+            <option value="media" {% if request.GET.prioridad == 'media' %}selected{% endif %}>Media</option>
+            <option value="alta" {% if request.GET.prioridad == 'alta' %}selected{% endif %}>Alta</option>
+            <option value="urgente" {% if request.GET.prioridad == 'urgente' %}selected{% endif %}>Urgente</option>
+        </select>
+        <select name="categoria">
+            <option value="">Todas las categorías</option>
+            <option value="hardware" {% if request.GET.categoria == 'hardware' %}selected{% endif %}>Hardware</option>
+            <option value="software" {% if request.GET.categoria == 'software' %}selected{% endif %}>Software</option>
+            <option value="red" {% if request.GET.categoria == 'red' %}selected{% endif %}>Red</option>
+            <option value="accesos" {% if request.GET.categoria == 'accesos' %}selected{% endif %}>Accesos</option>
+            <option value="otro" {% if request.GET.categoria == 'otro' %}selected{% endif %}>Otro</option>
+        </select>
+        <button type="submit" class="btn btn-primario">Filtrar</button>
+        <a href="{% url 'panelcontrol:lista_tickets' %}" class="btn btn-secundario">Limpiar</a>
+    </form>
+</div>
+
+{% if tickets %}
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Título</th>
+                <th>Creado por</th>
+                <th>Categoría</th>
+                <th>Estado</th>
+                <th>Prioridad</th>
+                <th>Fecha creación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in tickets %}
+            <tr>
+                <td>{{ ticket.id }}</td>
+                <td>{{ ticket.titulo }}</td>
+                <td>{{ ticket.creado_por.nombre }}</td>
+                <td>{{ ticket.get_categoria_display }}</td>
+                <td>
+                    <span class="badge badge-{{ ticket.estado }}">
+                        {{ ticket.get_estado_display }}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge badge-{{ ticket.prioridad }}">
+                        {{ ticket.get_prioridad_display }}
+                    </span>
+                </td>
+                <td>{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <a href="{% url 'panelcontrol:detalle_ticket' ticket.pk %}" class="btn btn-pequeño btn-primario">
+                        Ver
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p class="sin-datos">No hay tickets registrados.</p>
+{% endif %}
+{% endblock %}

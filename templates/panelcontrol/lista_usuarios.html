@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Argos - Usuarios{% endblock %}
+
+{% block contenido %}
+<div class="pagina-cabecera">
+    <h1>Usuarios</h1>
+</div>
+
+<div class="filtros">
+    <form method="get">
+        <select name="rol">
+            <option value="">Todos los roles</option>
+            <option value="usuario" {% if request.GET.rol == 'usuario' %}selected{% endif %}>Usuario</option>
+            <option value="administrador" {% if request.GET.rol == 'administrador' %}selected{% endif %}>Administrador</option>
+        </select>
+        <select name="activo">
+            <option value="">Todos</option>
+            <option value="true" {% if request.GET.activo == 'true' %}selected{% endif %}>Activos</option>
+            <option value="false" {% if request.GET.activo == 'false' %}selected{% endif %}>Inactivos</option>
+        </select>
+        <button type="submit" class="btn btn-primario">Filtrar</button>
+        <a href="{% url 'panelcontrol:lista_usuarios' %}" class="btn btn-secundario">Limpiar</a>
+    </form>
+</div>
+
+{% if usuarios %}
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Activo</th>
+                <th>Fecha registro</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario.id }}</td>
+                <td>{{ usuario.nombre }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>
+                    {% if usuario.rol %}
+                        {{ usuario.rol.nombre }}
+                    {% else %}
+                        <span class="sin-datos">Sin rol</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if usuario.is_active %}
+                        <span class="badge badge-resuelto">Activo</span>
+                    {% else %}
+                        <span class="badge badge-cerrado">Inactivo</span>
+                    {% endif %}
+                </td>
+                <td>{{ usuario.fecha_registro|date:"d/m/Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p class="sin-datos">No hay usuarios registrados.</p>
+{% endif %}
+{% endblock %}

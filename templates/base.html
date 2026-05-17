@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Argos{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+    {% block estilos_extra %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <nav class="navbar">
+        <div class="navbar-marca">
+            <img src="{% static 'img/logo.png' %}" alt="Argos" class="logo">
+            <span>Argos</span>
+        </div>
+        <div class="navbar-menu">
+            {% if user.rol and user.rol.nombre == 'administrador' %}
+                <a href="{% url 'panelcontrol:inicio' %}">Panel de control</a>
+                <a href="{% url 'panelcontrol:lista_tickets' %}">Tickets</a>
+                <a href="{% url 'panelcontrol:lista_inventario' %}">Inventario</a>
+                <a href="{% url 'panelcontrol:lista_usuarios' %}">Usuarios</a>
+            {% else %}
+                <a href="{% url 'portal:inicio' %}">Inicio</a>
+                <a href="{% url 'portal:mis_tickets' %}">Mis tickets</a>
+                <a href="{% url 'portal:crear_ticket' %}">Crear ticket</a>
+            {% endif %}
+        </div>
+        <div class="navbar-usuario">
+            <span>{{ user.nombre }}</span>
+            <a href="{% url 'cuentas:logout' %}">Cerrar sesión</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="contenido-principal">
+        {% if messages %}
+            <div class="mensajes">
+                {% for message in messages %}
+                    <div class="mensaje mensaje-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block contenido %}{% endblock %}
+    </main>
+
+    <footer class="pie-pagina">
+        <p>&copy; 2025 Argos - Gestor de Incidencias</p>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block scripts_extra %}{% endblock %}
+</body>
+</html>

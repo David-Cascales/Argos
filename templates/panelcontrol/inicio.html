@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Argos - Panel de control{% endblock %}
+
+{% block contenido %}
+<div class="pagina-cabecera">
+    <h1>Panel de control</h1>
+    <span class="subtitulo">Bienvenido, {{ user.nombre }}</span>
+</div>
+
+<div class="tarjetas-resumen">
+    <div class="tarjeta">
+        <h3>Total tickets</h3>
+        <span class="numero">{{ total_tickets }}</span>
+    </div>
+    <div class="tarjeta tarjeta-abierto">
+        <h3>Abiertos</h3>
+        <span class="numero">{{ tickets_abiertos }}</span>
+    </div>
+    <div class="tarjeta tarjeta-progreso">
+        <h3>En progreso</h3>
+        <span class="numero">{{ tickets_en_progreso }}</span>
+    </div>
+    <div class="tarjeta tarjeta-resuelto">
+        <h3>Resueltos</h3>
+        <span class="numero">{{ tickets_resueltos }}</span>
+    </div>
+</div>
+
+<div class="seccion">
+    <h2>Tickets recientes</h2>
+    <a href="{% url 'panelcontrol:lista_tickets' %}" class="btn btn-secundario">
+        Ver todos
+    </a>
+</div>
+{% endblock %}

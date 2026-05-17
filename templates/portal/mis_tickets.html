@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Argos - Mis tickets{% endblock %}
+
+{% block contenido %}
+<div class="pagina-cabecera">
+    <h1>Mis tickets</h1>
+    <a href="{% url 'portal:crear_ticket' %}" class="btn btn-primario">
+        Crear nuevo ticket
+    </a>
+</div>
+
+{% if tickets %}
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Título</th>
+                <th>Categoría</th>
+                <th>Estado</th>
+                <th>Prioridad</th>
+                <th>Fecha creación</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in tickets %}
+            <tr>
+                <td>{{ ticket.id }}</td>
+                <td>{{ ticket.titulo }}</td>
+                <td>{{ ticket.get_categoria_display }}</td>
+                <td>
+                    <span class="badge badge-{{ ticket.estado }}">
+                        {{ ticket.get_estado_display }}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge badge-{{ ticket.prioridad }}">
+                        {{ ticket.get_prioridad_display }}
+                    </span>
+                </td>
+                <td>{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p class="sin-datos">No tienes tickets registrados.</p>
+{% endif %}
+{% endblock %}

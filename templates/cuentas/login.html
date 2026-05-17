@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}Argos - Iniciar sesión{% endblock %}
+
+{% block contenido %}
+<div class="login-contenedor">
+    <div class="login-caja">
+        <div class="login-cabecera">
+            <img src="{% static 'img/logo.png' %}" alt="Argos" class="login-logo">
+            <h1>Argos</h1>
+            <p>Gestor de Incidencias</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="campo-formulario">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <span class="error">{{ field.errors }}</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primario btn-completo">
+                Iniciar sesión
+            </button>
+        </form>
+
+        <div class="login-separador">
+            <span>o</span>
+        </div>
+
+        <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-google btn-completo">
+            <img src="{% static 'img/google.png' %}" alt="Google">
+            Iniciar sesión con Google
+        </a>
+    </div>
+</div>
+{% endblock %}

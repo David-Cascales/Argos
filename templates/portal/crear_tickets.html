@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Argos - Crear ticket{% endblock %}
+
+{% block contenido %}
+<div class="pagina-cabecera">
+    <h1>Crear nuevo ticket</h1>
+</div>
+
+<div class="formulario-contenedor">
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="campo-formulario">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <span class="error">{{ field.errors }}</span>
+                {% endif %}
+                {% if field.help_text %}
+                    <span class="ayuda">{{ field.help_text }}</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div class="formulario-acciones">
+            <a href="{% url 'portal:mis_tickets' %}" class="btn btn-secundario">
+                Cancelar
+            </a>
+            <button type="submit" class="btn btn-primario">
+                Crear ticket
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

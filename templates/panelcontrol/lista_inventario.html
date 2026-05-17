@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Argos - Inventario{% endblock %}
+
+{% block contenido %}
+<div class="pagina-cabecera">
+    <h1>Inventario</h1>
+    <a href="#" class="btn btn-primario">Añadir item</a>
+</div>
+
+<div class="filtros">
+    <form method="get">
+        <select name="tipo">
+            <option value="">Todos los tipos</option>
+            <option value="ordenador" {% if request.GET.tipo == 'ordenador' %}selected{% endif %}>Ordenador</option>
+            <option value="impresora" {% if request.GET.tipo == 'impresora' %}selected{% endif %}>Impresora</option>
+            <option value="monitor" {% if request.GET.tipo == 'monitor' %}selected{% endif %}>Monitor</option>
+            <option value="servidor" {% if request.GET.tipo == 'servidor' %}selected{% endif %}>Servidor</option>
+            <option value="switch" {% if request.GET.tipo == 'switch' %}selected{% endif %}>Switch</option>
+            <option value="router" {% if request.GET.tipo == 'router' %}selected{% endif %}>Router</option>
+            <option value="telefono" {% if request.GET.tipo == 'telefono' %}selected{% endif %}>Teléfono</option>
+            <option value="otro" {% if request.GET.tipo == 'otro' %}selected{% endif %}>Otro</option>
+        </select>
+        <select name="estado">
+            <option value="">Todos los estados</option>
+            <option value="activo" {% if request.GET.estado == 'activo' %}selected{% endif %}>Activo</option>
+            <option value="inactivo" {% if request.GET.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
+            <option value="en_reparacion" {% if request.GET.estado == 'en_reparacion' %}selected{% endif %}>En reparación</option>
+            <option value="dado_de_baja" {% if request.GET.estado == 'dado_de_baja' %}selected{% endif %}>Dado de baja</option>
+        </select>
+        <button type="submit" class="btn btn-primario">Filtrar</button>
+        <a href="{% url 'panelcontrol:lista_inventario' %}" class="btn btn-secundario">Limpiar</a>
+    </form>
+</div>
+
+{% if items %}
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Gestionado por</th>
+                <th>Fecha registro</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.nombre }}</td>
+                <td>{{ item.get_tipo_display }}</td>
+                <td>
+                    <span class="badge badge-{{ item.estado }}">
+                        {{ item.get_estado_display }}
+                    </span>
+                </td>
+                <td>
+                    {% if item.gestionado_por %}
+                        {{ item.gestionado_por.nombre }}
+                    {% else %}
+                        <span class="sin-datos">Sin asignar</span>
+                    {% endif %}
+                </td>
+                <td>{{ item.fecha_registro|date:"d/m/Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p class="sin-datos">No hay items en el inventario.</p>
+{% endif %}
+{% endblock %}
