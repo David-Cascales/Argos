@@ -12,8 +12,8 @@
     {% if user.is_authenticated %}
     <nav class="navbar">
         <div class="navbar-marca">
-            <img src="{% static 'img/logo.png' %}" alt="Argos" class="logo">
-            <span>Argos</span>
+            <!-- <img src="{% static 'img/logo.png' %}" alt="Argos" class="logo"> -->
+             <img src="{% static 'img/logo.svg' %}" alt="Argos" class="logo">
         </div>
         <div class="navbar-menu">
             {% if user.rol and user.rol.nombre == 'administrador' %}
