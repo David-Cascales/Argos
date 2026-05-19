@@ -5,6 +5,9 @@
 {% block contenido %}
 <div class="pagina-cabecera">
     <h1>Usuarios</h1>
+    <a href="{% url 'panelcontrol:crear_usuario' %}" class="btn btn-primario">
+        Crear usuario
+    </a>
 </div>
 
 <div class="filtros">
@@ -34,6 +37,7 @@
                 <th>Rol</th>
                 <th>Activo</th>
                 <th>Fecha registro</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -57,6 +61,13 @@
                     {% endif %}
                 </td>
                 <td>{{ usuario.fecha_registro|date:"d/m/Y" }}</td>
+
+                <td>
+                    <a href="{% url 'panelcontrol:detalle_usuario' usuario.pk %}" class="btn btn-pequeño btn-primario">
+                        Ver
+                    </a>
+                </td>
+
             </tr>
             {% endfor %}
         </tbody>

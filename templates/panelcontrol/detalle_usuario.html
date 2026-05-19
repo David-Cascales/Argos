@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Argos - Usuario {{ usuario.nombre }}{% endblock %}
+
+{% block contenido %}
+<div class="pagina-cabecera">
+    <h1>{{ usuario.nombre }}</h1>
+    <a href="{% url 'panelcontrol:lista_usuarios' %}" class="btn btn-secundario">
+        Volver
+    </a>
+</div>
+
+<div class="detalle-contenedor">
+    <div class="detalle-principal">
+
+        <div class="detalle-seccion">
+            <h3>Información del usuario</h3>
+            <table class="tabla-detalle">
+                <tr>
+                    <th>Nombre</th>
+                    <td>{{ usuario.nombre }}</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>{{ usuario.email }}</td>
+                </tr>
+                <tr>
+                    <th>Rol</th>
+                    <td>
+                        {% if usuario.rol %}
+                            {{ usuario.rol.nombre }}
+                        {% else %}
+                            <span class="sin-datos">Sin rol</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Estado</th>
+                    <td>
+                        {% if usuario.is_active %}
+                            <span class="badge badge-resuelto">Activo</span>
+                        {% else %}
+                            <span class="badge badge-cerrado">Inactivo</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Fecha registro</th>
+                    <td>{{ usuario.fecha_registro|date:"d/m/Y H:i" }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="detalle-seccion">
+            <h3>Cambiar rol</h3>
+            <form method="post" action="{% url 'panelcontrol:cambiar_rol_usuario' usuario.pk %}">
+                {% csrf_token %}
+                <div class="formulario-acciones">
+                    <select name="rol">
+                        {% for rol in roles %}
+                            <option value="{{ rol.id }}" {% if usuario.rol == rol %}selected{% endif %}>
+                                {{ rol.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primario">Actualizar rol</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="detalle-seccion">
+            <h3>Estado del usuario</h3>
+            <form method="post" action="{% url 'panelcontrol:toggle_activo_usuario' usuario.pk %}">
+                {% csrf_token %}
+                {% if usuario.is_active %}
+                    <button type="submit" class="btn btn-secundario"
+                        onclick="return confirm('¿Estás seguro de que quieres desactivar este usuario?')">
+                        Desactivar usuario
+                    </button>
+                {% else %}
+                    <button type="submit" class="btn btn-primario"
+                        onclick="return confirm('¿Estás seguro de que quieres activar este usuario?')">
+                        Activar usuario
+                    </button>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="detalle-seccion">
+            <h3>Tickets del usuario</h3>
+            {% if tickets %}
+                <table class="tabla">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Título</th>
+                            <th>Estado</th>
+                            <th>Prioridad</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td>{{ ticket.id }}</td>
+                            <td>{{ ticket.titulo }}</td>
+                            <td>
+                                <span class="badge badge-{{ ticket.estado }}">
+                                    {{ ticket.get_estado_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ ticket.prioridad }}">
+                                    {{ ticket.get_prioridad_display }}
+                                </span>
+                            </td>
+                            <td>{{ ticket.fecha_creacion|date:"d/m/Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="sin-datos">Este usuario no tiene tickets registrados.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
 from django.contrib import messages
 from django.utils import timezone
 from tickets.repositories import TicketRepository, AsignacionRepository
@@ -7,7 +8,7 @@ from tickets.exports import ExportadorTicketsExcel
 from tickets.pdf import ExportadorTicketsPDF
 from inventario.repositories import ItemInventarioRepository
 from notificaciones.repositories import NotificacionRepository
-from cuentas.models import Usuario
+from cuentas.models import Usuario, Rol
 from tickets.models import Ticket
 
 
@@ -184,3 +185,75 @@ def lista_usuarios(request):
     if activo:
         usuarios = usuarios.filter(is_active=activo == 'true')
     return render(request, 'panelcontrol/lista_usuarios.html', {'usuarios': usuarios})
+
+
+@login_required
+def detalle_usuario(request, pk):
+    """Detalle de un usuario específico."""
+    usuario = get_object_or_404(Usuario, pk=pk)
+    roles = Rol.objects.all()
+    tickets = TicketRepository.obtener_por_usuario(usuario)
+    return render(request, 'panelcontrol/detalle_usuario.html', {
+        'usuario': usuario,
+        'roles': roles,
+        'tickets': tickets,
+    })
+
+
+@login_required
+def cambiar_rol_usuario(request, pk):
+    """Cambia el rol de un usuario."""
+    usuario = get_object_or_404(Usuario, pk=pk)
+    if request.method == 'POST':
+        rol_id = request.POST.get('rol')
+        try:
+            rol = Rol.objects.get(pk=rol_id)
+            usuario.rol = rol
+            usuario.save()
+            NotificacionRepository.crear(
+                usuario=usuario,
+                mensaje=f'Tu rol ha sido actualizado a {rol.nombre}.',
+                tipo='permiso_modificado'
+            )
+            messages.success(request, f'Rol actualizado a {rol.nombre} correctamente.')
+        except Rol.DoesNotExist:
+            messages.error(request, 'El rol seleccionado no existe.')
+    return redirect('panelcontrol:detalle_usuario', pk=pk)
+
+
+@login_required
+def toggle_activo_usuario(request, pk):
+    """Activa o desactiva un usuario."""
+    usuario = get_object_or_404(Usuario, pk=pk)
+    if request.method == 'POST':
+        usuario.is_active = not usuario.is_active
+        usuario.save()
+        estado = 'activado' if usuario.is_active else 'desactivado'
+        messages.success(request, f'Usuario {estado} correctamente.')
+    return redirect('panelcontrol:detalle_usuario', pk=pk)
+
+
+@login_required
+def crear_usuario(request):
+    """Crea un nuevo usuario."""
+    roles = Rol.objects.all()
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        rol_id = request.POST.get('rol')
+        try:
+            rol = Rol.objects.get(pk=rol_id)
+            usuario = Usuario.objects.create_user(
+                email=email,
+                password=password,
+                nombre=nombre,
+                rol=rol,
+            )
+            messages.success(request, f'Usuario {nombre} creado correctamente.')
+            return redirect('panelcontrol:detalle_usuario', pk=usuario.pk)
+        except Exception as e:
+            messages.error(request, f'Error al crear el usuario: {str(e)}')
+    return render(request, 'panelcontrol/crear_usuario.html', {'roles': roles})
+
+
