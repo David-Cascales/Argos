@@ -1,84 +1,140 @@
 {% extends 'base.html' %}
 
-{% block titulo %}Argos - Lista de tickets{% endblock %}
+{% block titulo %}Argos - Ticket #{{ ticket.id }}{% endblock %}
 
 {% block contenido %}
 <div class="pagina-cabecera">
-    <h1>Tickets</h1>
+    <h1>Ticket #{{ ticket.id }}</h1>
+    <a href="{% url 'panelcontrol:lista_tickets' %}" class="btn btn-secundario">
+        Volver
+    </a>
 </div>
 
-<div class="filtros">
-    <form method="get">
-        <select name="estado">
-            <option value="">Todos los estados</option>
-            <option value="abierto" {% if request.GET.estado == 'abierto' %}selected{% endif %}>Abierto</option>
-            <option value="en_progreso" {% if request.GET.estado == 'en_progreso' %}selected{% endif %}>En progreso</option>
-            <option value="pendiente" {% if request.GET.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
-            <option value="resuelto" {% if request.GET.estado == 'resuelto' %}selected{% endif %}>Resuelto</option>
-            <option value="cerrado" {% if request.GET.estado == 'cerrado' %}selected{% endif %}>Cerrado</option>
-        </select>
-        <select name="prioridad">
-            <option value="">Todas las prioridades</option>
-            <option value="baja" {% if request.GET.prioridad == 'baja' %}selected{% endif %}>Baja</option>
-            <option value="media" {% if request.GET.prioridad == 'media' %}selected{% endif %}>Media</option>
-            <option value="alta" {% if request.GET.prioridad == 'alta' %}selected{% endif %}>Alta</option>
-            <option value="urgente" {% if request.GET.prioridad == 'urgente' %}selected{% endif %}>Urgente</option>
-        </select>
-        <select name="categoria">
-            <option value="">Todas las categorías</option>
-            <option value="hardware" {% if request.GET.categoria == 'hardware' %}selected{% endif %}>Hardware</option>
-            <option value="software" {% if request.GET.categoria == 'software' %}selected{% endif %}>Software</option>
-            <option value="red" {% if request.GET.categoria == 'red' %}selected{% endif %}>Red</option>
-            <option value="accesos" {% if request.GET.categoria == 'accesos' %}selected{% endif %}>Accesos</option>
-            <option value="otro" {% if request.GET.categoria == 'otro' %}selected{% endif %}>Otro</option>
-        </select>
-        <button type="submit" class="btn btn-primario">Filtrar</button>
-        <a href="{% url 'panelcontrol:lista_tickets' %}" class="btn btn-secundario">Limpiar</a>
-    </form>
-</div>
+<div class="detalle-contenedor">
+    <div class="detalle-principal">
 
-{% if tickets %}
-    <table class="tabla">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Título</th>
-                <th>Creado por</th>
-                <th>Categoría</th>
-                <th>Estado</th>
-                <th>Prioridad</th>
-                <th>Fecha creación</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for ticket in tickets %}
-            <tr>
-                <td>{{ ticket.id }}</td>
-                <td>{{ ticket.titulo }}</td>
-                <td>{{ ticket.creado_por.nombre }}</td>
-                <td>{{ ticket.get_categoria_display }}</td>
-                <td>
-                    <span class="badge badge-{{ ticket.estado }}">
-                        {{ ticket.get_estado_display }}
-                    </span>
-                </td>
-                <td>
-                    <span class="badge badge-{{ ticket.prioridad }}">
-                        {{ ticket.get_prioridad_display }}
-                    </span>
-                </td>
-                <td>{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</td>
-                <td>
-                    <a href="{% url 'panelcontrol:detalle_ticket' ticket.pk %}" class="btn btn-pequeño btn-primario">
-                        Ver
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p class="sin-datos">No hay tickets registrados.</p>
-{% endif %}
+        <div class="detalle-seccion">
+            <h2>{{ ticket.titulo }}</h2>
+            <p>{{ ticket.descripcion }}</p>
+        </div>
+
+        <div class="detalle-seccion">
+            <h3>Información del ticket</h3>
+            <table class="tabla-detalle">
+                <tr>
+                    <th>Estado</th>
+                    <td>
+                        <span class="badge badge-{{ ticket.estado }}">
+                            {{ ticket.get_estado_display }}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Prioridad</th>
+                    <td>
+                        <span class="badge badge-{{ ticket.prioridad }}">
+                            {{ ticket.get_prioridad_display }}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Categoría</th>
+                    <td>{{ ticket.get_categoria_display }}</td>
+                </tr>
+                <tr>
+                    <th>Creado por</th>
+                    <td>{{ ticket.creado_por.nombre }}</td>
+                </tr>
+                <tr>
+                    <th>Fecha creación</th>
+                    <td>{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                </tr>
+                <tr>
+                    <th>Última actualización</th>
+                    <td>{{ ticket.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% if ticket.fecha_cierre %}
+                <tr>
+                    <th>Fecha cierre</th>
+                    <td>{{ ticket.fecha_cierre|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+
+        <div class="detalle-seccion">
+            <h3>Cambiar estado</h3>
+            <form method="post" action="{% url 'panelcontrol:cambiar_estado_ticket' ticket.pk %}">
+                {% csrf_token %}
+                <div class="formulario-acciones">
+                    <select name="estado">
+                        {% for valor, etiqueta in estados %}
+                            <option value="{{ valor }}" {% if ticket.estado == valor %}selected{% endif %}>
+                                {{ etiqueta }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primario">Actualizar estado</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="detalle-seccion">
+            <h3>Cambiar prioridad</h3>
+            <form method="post" action="{% url 'panelcontrol:cambiar_prioridad_ticket' ticket.pk %}">
+                {% csrf_token %}
+                <div class="formulario-acciones">
+                    <select name="prioridad">
+                        {% for valor, etiqueta in prioridades %}
+                            <option value="{{ valor }}" {% if ticket.prioridad == valor %}selected{% endif %}>
+                                {{ etiqueta }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primario">Actualizar prioridad</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="detalle-seccion">
+            <h3>Asignar ticket</h3>
+            <form method="post" action="{% url 'panelcontrol:asignar_ticket' ticket.pk %}">
+                {% csrf_token %}
+                <div class="formulario-acciones">
+                    <select name="administrador">
+                        <option value="">Seleccionar administrador</option>
+                        {% for admin in administradores %}
+                            <option value="{{ admin.id }}">{{ admin.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primario">Asignar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="detalle-seccion">
+            <h3>Asignaciones actuales</h3>
+            {% if asignaciones %}
+                <ul>
+                    {% for asignacion in asignaciones %}
+                        <li>{{ asignacion.administrador.nombre }} — {{ asignacion.fecha_asignacion|date:"d/m/Y H:i" }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="sin-datos">Este ticket no tiene administradores asignados.</p>
+            {% endif %}
+        </div>
+
+        <div class="detalle-seccion">
+            <form method="post" action="{% url 'panelcontrol:cerrar_ticket' ticket.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secundario"
+                    onclick="return confirm('¿Estás seguro de que quieres cerrar este ticket?')">
+                    Cerrar ticket
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
 {% endblock %}
