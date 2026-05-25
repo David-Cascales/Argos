@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Argos - Mis notificaciones{% endblock %}
+
+{% block contenido %}
+<div class="pagina-cabecera">
+    <h1>Mis notificaciones</h1>
+    {% if notificaciones %}
+        <form method="post" action="{% url 'portal:marcar_todas_leidas' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secundario">
+                Marcar todas como leídas
+            </button>
+        </form>
+    {% endif %}
+</div>
+
+{% if notificaciones %}
+    <div class="lista-notificaciones">
+        {% for notificacion in notificaciones %}
+        <div class="notificacion {% if not notificacion.leido %}notificacion-no-leida{% endif %}">
+            <div class="notificacion-contenido">
+                <p>{{ notificacion.mensaje }}</p>
+                <span class="notificacion-fecha">{{ notificacion.fecha|date:"d/m/Y H:i" }}</span>
+            </div>
+            <div class="notificacion-acciones">
+                {% if not notificacion.leido %}
+                    <form method="post" action="{% url 'portal:marcar_notificacion_leida' notificacion.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-pequeño btn-primario">
+                            Marcar como leída
+                        </button>
+                    </form>
+                {% else %}
+                    <span class="badge badge-resuelto">Leída</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="sin-datos">No tienes notificaciones.</p>
+{% endif %}
+{% endblock %}
